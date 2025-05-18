@@ -1,11 +1,11 @@
-# Use a lightweight Java image
-FROM openjdk:17-jdk-slim
-
-# Set working directory
+# -------- STAGE 1: Build the JAR --------
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
 
-# Copy the built JAR file into the container
-COPY target/Spring_Boot-0.0.1-SNAPSHOT.jar app.jar
-
-# Command to run the application
+# -------- STAGE 2: Run the app --------
+FROM openjdk:17-jdk-slim
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]
